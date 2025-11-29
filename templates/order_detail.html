@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h3>Chi tiết hóa đơn #{{ order.id }}</h3>
+  <p><b>Tổng tiền:</b> {{ "{:,.0f}".format(order.total) }}đ</p>
+  <p><b>Trạng thái:</b> {{ order.status }}</p>
+
+  <table class="table table-bordered mt-3">
+    <thead class="table-light">
+      <tr>
+        <th>Sản phẩm</th>
+        <th>Số lượng</th>
+        <th>Đơn giá</th>
+        <th>Thành tiền</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>{{ item.name }}</td>
+        <td>{{ item.quantity }}</td>
+           <td>{{ "{:,.0f}".format(item.price) }}đ</td>
+      <td>{{ "{:,.0f}".format(item.quantity * item.price) }}đ</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <a href="{{ url_for('orders') }}" class="btn btn-secondary">⬅ Quay lại</a>
+  <a href="{{ url_for('order_print', order_id=order._id) }}" class="btn btn-success">🖨 In hóa đơn</a>
+</div>
+{% endblock %}

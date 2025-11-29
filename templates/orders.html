@@ -1,0 +1,44 @@
+{% extends "layout.html" %} {% block content %}
+<div class="container mt-4">
+  <h3>📜 Danh sách hóa đơn</h3>
+  <table class="table table-striped table-bordered mt-3">
+    <thead class="table-dark">
+      <tr>
+        <th>ID</th>
+        <th>Bàn</th>
+        <th>Nhân viên</th>
+        <th>Tổng tiền</th>
+        <th>Trạng thái</th>
+        <th>Ngày tạo</th>
+        <th>Hành động</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td>{{ o._id }}</td>
+        <td>{{ o.table_name }}</td>
+        <td>{{ o.full_name }}</td>
+        <td>{{ "{:,.0f}".format(o.total) }}đ</td>
+        <td>{{ o.status }}</td>
+        <td>{{ o.created_at }}</td>
+        <td>
+          <a
+            href="{{ url_for('order_detail', order_id=o._id) }}"
+            class="btn btn-info btn-sm"
+          >
+            Xem chi tiết
+          </a>
+
+          <a
+            href="{{ url_for('order_print', order_id=o._id) }}"
+            class="btn btn-sm btn-success"
+            >🖨 In</a
+          >
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

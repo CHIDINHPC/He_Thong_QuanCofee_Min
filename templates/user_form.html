@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block content %}
+<h3>{{ action }} nhân viên</h3>
+<form method="POST">
+  <div class="mb-3">
+    <label>Tài khoản:</label>
+    <input type="text" name="username" class="form-control" 
+           value="{{ user.username if user else '' }}" {% if user %}readonly{% endif %}>
+  </div>
+  {% if not user %}
+  <div class="mb-3">
+    <label>Mật khẩu:</label>
+    <input type="password" name="password" class="form-control" required>
+  </div>
+  {% endif %}
+  <div class="mb-3">
+    <label>Họ tên:</label>
+    <input type="text" name="full_name" class="form-control" value="{{ user.full_name if user else '' }}">
+  </div>
+  <div class="mb-3">
+    <label>Quyền:</label>
+    <select name="role" class="form-select">
+      <option value="staff" {% if user and user.role=="staff" %}selected{% endif %}>Nhân viên</option>
+      <option value="admin" {% if user and user.role=="admin" %}selected{% endif %}>Admin</option>
+    </select>
+  </div>
+  <button class="btn btn-success">💾 Lưu</button>
+  <a href="{{ url_for('users') }}" class="btn btn-secondary">Hủy</a>
+</form>
+{% endblock %}

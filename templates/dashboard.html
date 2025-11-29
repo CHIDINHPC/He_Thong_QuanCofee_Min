@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="dashboard">
+  <h1>📊 Quản lý quán cà phê </h1>
+  <p>Xin chào <b>{{ session.username }}</b> (quyền: {{ session.role }})</p>
+
+  <div class="card-grid">
+    <a href="{{ url_for('pos') }}" class="card">
+      <h5>💳 Bán hàng (POS)</h5>
+      <p>Tạo đơn trực tiếp theo bàn</p>
+    </a>
+    <a href="{{ url_for('orders') }}" class="card">
+      <h5>📜 Hóa đơn</h5>
+      <p>Danh sách hóa đơn đã thanh toán</p>
+    </a>
+    <a href="{{ url_for('reports') }}" class="card">
+      <h5>📈 Báo cáo</h5>
+      <p>Xem doanh thu theo ngày/tháng</p>
+    </a>
+  </div>
+
+  {% if session.role == "admin" %}
+  <div class="card-grid">
+    <a href="{{ url_for('users') }}" class="card">
+      <h5>👨‍💼 Quản lý nhân viên</h5>
+    </a>
+    <a href="{{ url_for('products') }}" class="card">
+      <h5>☕ Quản lý sản phẩm</h5>
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

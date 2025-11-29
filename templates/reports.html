@@ -1,0 +1,599 @@
+{% extends "layout.html" %} {% block content %}
+
+<!-- ================== HEADER ================== -->
+<div class="report-header">
+  <h1>BÁO CÁO DOANH THU</h1>
+  <div class="report-period">
+    <span class="period-badge">Từ ngày: {{ start_date }}</span>
+    <span class="period-badge">Đến ngày: {{ end_date }}</span>
+  </div>
+</div>
+
+<!-- ================== BỘ LỌC THỜI GIAN ================== -->
+<div class="filter-section">
+  <form method="POST" action="/reports" class="filter-form">
+    <div class="filter-inputs">
+      <div class="input-group">
+        <label>Từ ngày</label>
+        <input
+          type="date"
+          name="start_date"
+          value="{{ start_date }}"
+          class="form-control"
+        />
+      </div>
+      <div class="input-group">
+        <label>Đến ngày</label>
+        <input
+          type="date"
+          name="end_date"
+          value="{{ end_date }}"
+          class="form-control"
+        />
+      </div>
+      <button type="submit" class="btn-filter">
+        <i class="fas fa-filter"></i> Lọc dữ liệu
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- ================== THỐNG KÊ NHANH ================== -->
+<div class="kpi-section">
+  <div class="kpi-container">
+    <div class="kpi-card">
+      <div class="kpi-icon">
+        <i class="fas fa-receipt"></i>
+      </div>
+      <div class="kpi-content">
+        <h3>Tổng số hóa đơn</h3>
+        <p class="kpi-value">{{ tong_hoa_don }}</p>
+      </div>
+    </div>
+
+    <div class="kpi-card highlight">
+      <div class="kpi-icon">
+        <i class="fas fa-chart-line"></i>
+      </div>
+      <div class="kpi-content">
+        <h3>Tổng doanh thu</h3>
+        <p class="kpi-value">{{ "{:,.0f}".format(tong_doanh_thu) }} đ</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================== BIỂU ĐỒ ================== -->
+<div class="charts-section">
+  <!-- BIỂU ĐỒ DOANH THU THEO NGÀY -->
+  <div class="chart-container">
+    <div class="chart-header">
+      <h3><i class="fas fa-calendar-day"></i> Doanh thu theo ngày</h3>
+    </div>
+    <div class="chart-wrapper">
+      <canvas id="chart_day"></canvas>
+    </div>
+  </div>
+
+  <!-- BIỂU ĐỒ DOANH THU THEO THÁNG -->
+  <div class="chart-container">
+    <div class="chart-header">
+      <h3><i class="fas fa-calendar-alt"></i> Doanh thu theo tháng</h3>
+    </div>
+    <div class="chart-wrapper">
+      <canvas id="chart_month"></canvas>
+    </div>
+  </div>
+
+  <!-- ================== BẢNG DOANH THU THEO NGÀY ================== -->
+  <div class="table-section">
+    <div class="section-header">
+      <h3><i class="fas fa-table"></i> Bảng doanh thu theo ngày</h3>
+    </div>
+    <div class="table-container">
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>Ngày</th>
+            <th>Doanh thu</th>
+            <th>Số hóa đơn</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in data_day %}
+          <tr>
+            <td>{{ r.ngay }}</td>
+            <td class="revenue-cell">{{ "{:,.0f}".format(r.doanh_thu) }} đ</td>
+            <td class="invoice-cell">{{ r.so_hoa_don }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr class="table-total">
+            <td><strong>Tổng cộng</strong></td>
+            <td><strong>{{ "{:,.0f}".format(tong_doanh_thu) }} đ</strong></td>
+            <td><strong>{{ tong_hoa_don }}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- ================== BẢNG TOÀN BỘ SẢN PHẨM ================== -->
+  <div class="table-section">
+    <div class="section-header">
+      <h3><i class="fas fa-list-alt"></i> Toàn bộ sản phẩm đã bán</h3>
+    </div>
+    <div class="table-container">
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>STT</th>
+            <th>Tên sản phẩm</th>
+            <th>Số lượng bán</th>
+            <th>Doanh thu</th>
+            <th>Đơn giá trung bình</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in all_products %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td class="product-name">{{ product.ten_san_pham }}</td>
+            <td class="quantity-cell">{{ product.so_luong }}</td>
+            <td class="revenue-cell">
+              {{ "{:,.0f}".format(product.doanh_thu) }} đ
+            </td>
+            <td class="price-cell">
+              {{ "{:,.0f}".format(product.doanh_thu / product.so_luong if
+              product.so_luong > 0 else 0) }} đ
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr class="table-total">
+            <td colspan="2"><strong>Tổng cộng</strong></td>
+            <td><strong>{{ total_quantity }}</strong></td>
+            <td><strong>{{ "{:,.0f}".format(tong_doanh_thu) }} đ</strong></td>
+            <td><strong>-</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://kit.fontawesome.com/your-fontawesome-kit.js"></script>
+  <script>
+    // Màu sắc chủ đạo
+    const colors = {
+        primary: '#4361ee',
+        success: '#06d6a0',
+        danger: '#ef476f',
+        warning: '#ffd166',
+        info: '#118ab2'
+    };
+
+    // ================== DOANH THU THEO NGÀY ==================
+    new Chart(document.getElementById('chart_day'), {
+        type: 'line',
+        data: {
+            labels: {{ labels_day | safe }},
+            datasets: [{
+                label: "Doanh thu",
+                data: {{ values_day | safe }},
+                borderWidth: 3,
+                borderColor: colors.primary,
+                backgroundColor: "rgba(67, 97, 238, 0.1)",
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: colors.primary,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0,0,0,0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // ================== DOANH THU THEO THÁNG ==================
+    new Chart(document.getElementById('chart_month'), {
+        type: 'bar',
+        data: {
+            labels: {{ labels_month | safe }},
+            datasets: [{
+                label: "Doanh thu",
+                data: {{ values_month | safe }},
+                borderWidth: 1,
+                backgroundColor: "rgba(6, 214, 160, 0.3)",
+                borderColor: colors.success,
+                borderRadius: 8,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0,0,0,0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+  </script>
+
+  <style>
+    /* ================== STYLES ================== */
+    :root {
+      --primary: #4361ee;
+      --success: #06d6a0;
+      --danger: #ef476f;
+      --warning: #ffd166;
+      --info: #118ab2;
+      --light: #f8f9fa;
+      --dark: #212529;
+    }
+
+    .report-header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: linear-gradient(135deg, var(--primary), #3a56d4);
+      color: white;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .report-header h1 {
+      margin: 0 0 10px 0;
+      font-size: 2.2em;
+      font-weight: 700;
+    }
+
+    .report-period {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .period-badge {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      backdrop-filter: blur(10px);
+    }
+
+    .filter-section {
+      background: var(--light);
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-inputs {
+      display: flex;
+      gap: 15px;
+      align-items: end;
+      flex-wrap: wrap;
+    }
+
+    .input-group {
+      flex: 1;
+      min-width: 150px;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+    }
+
+    .btn-filter {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-filter:hover {
+      background: #3a56d4;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+    }
+
+    .kpi-section {
+      margin: 40px 0;
+    }
+
+    .kpi-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .kpi-card {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      transition: transform 0.3s ease;
+      border-left: 5px solid var(--primary);
+    }
+
+    .kpi-card.highlight {
+      border-left-color: var(--success);
+      transform: scale(1.02);
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .kpi-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, var(--primary), #3a56d4);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5em;
+    }
+
+    .kpi-card.highlight .kpi-icon {
+      background: linear-gradient(135deg, var(--success), #05c290);
+    }
+
+    .kpi-content h3 {
+      margin: 0 0 5px 0;
+      font-size: 0.9em;
+      color: #6c757d;
+      font-weight: 600;
+    }
+
+    .kpi-value {
+      margin: 0;
+      font-size: 1.8em;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .charts-section {
+      display: grid;
+      gap: 30px;
+      margin: 40px 0;
+    }
+
+    .chart-container {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .chart-header {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .chart-header h3 {
+      color: var(--dark);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 1.3em;
+    }
+
+    .chart-wrapper {
+      position: relative;
+      height: 800px;
+    }
+
+    .table-section {
+      margin: 40px 0;
+    }
+
+    .section-header {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .section-header h3 {
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 1.3em;
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      overflow-x: auto;
+    }
+
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1400px;
+    }
+
+    .report-table th {
+      background: var(--primary);
+      color: white;
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+
+    .report-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .report-table tr:hover {
+      background: #f8f9fa;
+    }
+
+    .revenue-cell {
+      font-weight: 600;
+      color: var(--success);
+    }
+
+    .invoice-cell {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .quantity-cell {
+      font-weight: 600;
+      color: var(--info);
+    }
+
+    .price-cell {
+      font-weight: 600;
+      color: var(--warning);
+    }
+
+    .product-name {
+      font-weight: 500;
+    }
+
+    .table-total {
+      background: var(--light) !important;
+      font-size: 1.1em;
+    }
+
+    .table-total td {
+      border-top: 2px solid var(--dark);
+      font-weight: 700;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .filter-inputs {
+        flex-direction: column;
+      }
+
+      .input-group {
+        min-width: 100%;
+      }
+
+      .kpi-container {
+        grid-template-columns: 1fr;
+      }
+
+      .chart-wrapper {
+        height: 300px;
+      }
+
+      .report-period {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .table-container {
+        border-radius: 10px;
+      }
+
+      .report-table {
+        font-size: 0.9em;
+      }
+
+      .report-table th,
+      .report-table td {
+        padding: 10px 8px;
+      }
+    }
+
+    /* Scrollbar cho bảng */
+    .table-container::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .table-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    .table-container::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    .table-container::-webkit-scrollbar-thumb:hover {
+      background: #3a56d4;
+    }
+  </style>
+
+  {% endblock %}
+</div>

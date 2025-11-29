@@ -1,0 +1,93 @@
+{% extends "layout.html" %} {% block content %}
+<div class="container-fluid mt-3">
+  <h2 class="mb-4">🍽 Bàn {{ table.table_name }}</h2>
+  <div class="row">
+    <!-- Danh sách món -->
+    <div class="col-md-8">
+      <div class="row row-cols-2 row-cols-md-3 g-3">
+        {% for p in products %}
+        <div class="col">
+          <form
+            action="{{ url_for('pos_order', table_id=table._id) }}"
+            method="POST"
+          >
+            <input type="hidden" name="product_id" value="{{ p._id }}" />
+            <input type="hidden" name="quantity" value="1" />
+            <button
+              type="submit"
+              class="card h-100 btn btn-light text-start shadow-sm w-100"
+            >
+              <div class="card-body">
+                <h5 class="card-title">{{ p.name }}</h5>
+                <p class="card-text text-muted">
+                  {{ "{:,.0f}".format(p.price) }} đ
+                </p>
+              </div>
+            </button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Hóa đơn -->
+    <div class="col-md-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">🧾 Hóa đơn</h5>
+          {% if items and items|length > 0 %}
+          <div
+            class="table-responsive"
+            style="max-height: 400px; overflow-y: auto"
+          >
+            <table class="table table-sm table-bordered align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Món</th>
+                  <th>SL</th>
+                  <th>Giá</th>
+                  <th>TT</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in items %}
+                <tr>
+                  <td>{{ item.name }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>{{ "{:,.0f}".format(item.price) }}đ</td>
+                  <td>{{ "{:,.0f}".format(item.quantity * item.price) }}đ</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot class="fw-bold">
+                <tr>
+                  <td colspan="3" class="text-end">Tổng cộng:</td>
+                  <td>{{ "{:,.0f}".format(total) }} đ</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <div class="d-grid gap-2 mt-3">
+            <a
+              href="{{ url_for('pay_order', order_id=order._id) }}"
+              class="btn btn-success btn-lg"
+              onclick="return confirmPay();"
+            >
+              💳 Thanh toán
+            </a>
+          </div>
+          {% else %}
+          <p class="text-muted">👉 Order mới, chưa có món nào.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function confirmPay() {
+    return confirm("Bạn có muốn in hóa đơn không?");
+  }
+</script>
+{% endblock %}

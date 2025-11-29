@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block content %}
+<form method="POST" enctype="multipart/form-data" class="product-form">
+  <div class="form-group">
+    <h3>{{ action }} sản phẩm</h3>
+    <label for="name">Tên món:</label>
+    <input type="text" id="name" name="name" value="{{ product.name if product else '' }}" required>
+  </div>
+
+  <div class="form-group">
+    <label for="price">Giá:</label>
+    <input type="number" id="price" name="price" value="{{ product.price if product else '' }}" required>
+  </div>
+
+  <div class="form-group">
+    <label for="description">Mô tả:</label>
+    <textarea id="description" name="description">{{ product.description if product else '' }}</textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="image">Hình ảnh:</label>
+    {% if product and product.image %}
+      <div class="preview">
+        <img src="{{ url_for('static', filename='uploads/' ~ product.image) }}" width="120">
+      </div>
+    {% endif %}
+    <input type="file" id="image" name="image">
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn save">💾 Lưu</button>
+    <a href="{{ url_for('products') }}" class="btn cancel">Hủy</a>
+  </div>
+</form>
+{% endblock %}

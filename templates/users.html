@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block content %}
+<h3>Quản lý nhân viên</h3>
+<a href="{{ url_for('add_user') }}" class="add-btn">➕ Thêm nhân viên</a>
+
+<table class="custom-table">
+  <tr>
+    <th>ID</th>
+    <th>Tài khoản</th>
+    <th>Họ tên</th>
+    <th>Quyền</th>
+    <th>Ngày tạo</th>
+    <th>Hành động</th>
+  </tr>
+  {% for u in users %}
+  <tr>
+    <td>{{ u.id }}</td>
+    <td>{{ u.username }}</td>
+    <td>
+          {{ u.full_name }}
+    </td>
+    <td>{{ u.role }}</td>
+    <td>{{ u.created_at }}</td>
+    <td>
+      <a href="{{ url_for('edit_user', id=u.id) }}" class="btn btn-edit">✏ Sửa</a>
+      <a href="{{ url_for('delete_user', id=u.id) }}" class="btn btn-delete"
+         onclick="return confirm('Xóa nhân viên này?')">🗑 Xóa</a>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}
